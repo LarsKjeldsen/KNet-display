@@ -36,7 +36,9 @@
 #include "Network.h"
 #include <Arduino.h>
 
-#define SLEEPTIME 60000
+
+unsigned long SleepTime = 60000;
+
 #define LED 22
 #define DISPLAY_POWERPIN 17 // 5
 
@@ -45,8 +47,8 @@ float bat;
 
 void setup() {
 
-//	pinMode(LED, OUTPUT);
-//	digitalWrite(LED, HIGH);
+	//	pinMode(LED, OUTPUT);
+	//	digitalWrite(LED, HIGH);
 	unsigned long start = millis();
 
 	Serial.begin(115200);
@@ -64,9 +66,26 @@ void setup() {
 		SendBattery();
 
 	WiFi.disconnect();
-	
+
 	// pinMode(DISPLAY_POWERPIN, OUTPUT);
 	// digitalWrite(DISPLAY_POWERPIN, HIGH);
+
+	int hour = 25;
+
+	if (Display.Tid.length() == 5 && Display.Tid[0] != 'x')
+	{
+		hour = atoi(Display.Tid.substr(0, 2).c_str());
+
+		Serial.print("Hour = ");  Serial.println(hour);
+
+		if (hour > 6)
+			SleepTime = 60000;  // 1 min
+		else
+		{
+			SleepTime = 600000;   // 10 min
+			Display.Tid[4] = 'x';
+		}
+	}
 
 	minut_10_tick = true;  // Force full update everytime
 
@@ -81,13 +100,13 @@ void setup() {
 
 	int runtime = start - millis();
 
-	unsigned long t = runtime + SLEEPTIME;
+	unsigned long t = runtime + SleepTime;
 
-		if (t < 100 || t > SLEEPTIME) {
+	if (t < 100 || t > SleepTime) {
 		Serial.println("Something wrong with sleeptimer - restarting ESP");
 		ESP.restart();
 	}
-	
+
 	Serial.print("Sleeping : "); Serial.println(t);
 
 	Display.Sleep();

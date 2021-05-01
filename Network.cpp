@@ -6,7 +6,7 @@ char password[] = "donnafrida";
 IPAddress ip(192, 168, 1, 216);
 IPAddress gw(192, 168, 1, 1);
 IPAddress mask(255, 255, 255, 0);
-IPAddress mqtt(192,168,1,20);
+IPAddress mqtt(192, 168, 1, 20);
 
 WiFiClient ethClient;
 HTTPClient httpClient;
@@ -47,10 +47,9 @@ void WiFi_Setup()
 	Serial.print("WiFi connected IP address: ");
 	Serial.println(WiFi.localIP());
 
-	// Home Assistant Token : eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJhYzEyMzE5YmQwNTI0OWUwOTAzMWJjYWMzM2JjODhmNiIsImlhdCI6MTU4NDgyOTQwMCwiZXhwIjoxOTAwMTg5NDAwfQ.nGUZE6_pGixwff7KQywGdP-L0vrsZKxo-ABj5wQGzog
 
-	httpClient.begin("http://192.168.1.20:8123/api/states/sensor.besked");
-	httpClient.addHeader("Authorization", "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJhYzEyMzE5YmQwNTI0OWUwOTAzMWJjYWMzM2JjODhmNiIsImlhdCI6MTU4NDgyOTQwMCwiZXhwIjoxOTAwMTg5NDAwfQ.nGUZE6_pGixwff7KQywGdP-L0vrsZKxo-ABj5wQGzog");
+	httpClient.begin("http://192.168.1.21:8123/api/states/sensor.besked");
+	httpClient.addHeader("Authorization", "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJkMWYyMTkyODA1ODQ0ZDMwYTVhZjJlN2E0MmJiYjUwNyIsImlhdCI6MTYxNDY3MTQ2NCwiZXhwIjoxOTMwMDMxNDY0fQ.UiuVA_HkKrm6oDAgZ_u69xEmiIvUR0-T_q8H6vyaeaQ");
 	httpClient.addHeader("Content-Type", "application/json");
 
 	Display.Tid = "xx:xx";
@@ -58,6 +57,13 @@ void WiFi_Setup()
 	Display.Besked = "Home assistant is down.....";
 
 	int httpCode = httpClient.GET();
+
+	if (httpCode == -11)  // Try again.
+	{
+		httpCode = httpClient.GET();
+		Serial.print("*************** Retrying HTTP request httpcode = "); Serial.println(httpCode);
+	}
+
 	if (httpCode > 0) { //Check for the returning code
 
 		String payload = httpClient.getString();
@@ -92,10 +98,14 @@ void WiFi_Setup()
 	}
 
 	else {
-		Display.Besked = "Error on HTTP request, errorcode : ";
-		Serial.print("Error on HTTP request, errorcode : ");
-		Serial.println(httpCode);
+		for (int i = 0; i < 20; i++)
+			Serial.print('*');
+		Serial.println(httpClient.getString());
+
+		Display.Besked = "Error on HTTP request, errorcode : " + httpCode;
+		Serial.print("Error on HTTP request, errorcode : "); Serial.println(httpCode);
 	}
+	httpClient.end();
 }
 
 void SendBattery()
