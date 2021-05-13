@@ -6,7 +6,8 @@ char password[] = "donnafrida";
 IPAddress ip(192, 168, 1, 216);
 IPAddress gw(192, 168, 1, 1);
 IPAddress mask(255, 255, 255, 0);
-IPAddress mqtt(192, 168, 1, 20);
+IPAddress mqtt(192, 168, 1, 21);
+
 
 WiFiClient ethClient;
 HTTPClient httpClient;
@@ -49,7 +50,7 @@ void WiFi_Setup()
 
 
 	httpClient.begin("http://192.168.1.21:8123/api/states/sensor.besked");
-	httpClient.addHeader("Authorization", "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJkMWYyMTkyODA1ODQ0ZDMwYTVhZjJlN2E0MmJiYjUwNyIsImlhdCI6MTYxNDY3MTQ2NCwiZXhwIjoxOTMwMDMxNDY0fQ.UiuVA_HkKrm6oDAgZ_u69xEmiIvUR0-T_q8H6vyaeaQ");
+	httpClient.addHeader("Authorization", "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJhMzMyZWEzMTJjZTY0NmIwYTE5MjY3OTM0NzYxNTViNSIsImlhdCI6MTYyMDkyMDA2NiwiZXhwIjoxOTM2MjgwMDY2fQ.kLgcHfbVC9nxAVG4swHNuxAo4fyOr4UcmZMIF3r2_9M");
 	httpClient.addHeader("Content-Type", "application/json");
 
 	Display.Tid = "xx:xx";
