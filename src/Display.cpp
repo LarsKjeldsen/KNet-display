@@ -1,5 +1,7 @@
 #include "Display.h"
 
+#include <Adafruit_GFX.h>
+#include <GxEPD2_BW.h>
 #include "BodoniMT8.h"
 #include "BodoniMT12.h"
 #include "BodoniMT24.h"
@@ -47,8 +49,8 @@ void DisplayClass::setup(bool FullUpdate)
 //	display.setFont(&FreeSerifBold9pt7b);
 	display.setFont(&LSK8pt8b);
 
-	static char* char_temp = "Ude temp";
-	static char* char_ur = "Ur";
+	static const char* char_temp = "Ude temp";
+	static const char* char_ur = "Ur";
 
 	int16_t tbx, tby; uint16_t x1, tbw, tbh, tbx_temp, tbx_ur;
 
@@ -189,11 +191,11 @@ std::string DisplayClass::StringConv(std::string s)
 	
 	/*
 	186;  // Grad
-	197;  // Å
-	198;  // Æ
-	216;  // Ø
-	229;  // å
-	230;  // æ
-	248;  // ø
+	197;  // ï¿½
+	198;  // ï¿½
+	216;  // ï¿½
+	229;  // ï¿½
+	230;  // ï¿½
+	248;  // ï¿½
 */
 }

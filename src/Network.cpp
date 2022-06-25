@@ -112,8 +112,9 @@ void WiFi_Setup()
 void SendBattery()
 {
 	client.setServer(mqtt, 1883);
-	client.connect("KNet-Display-1");
+	client.connect("KNet-Display_1");
 	char s[10];
-	client.publish("KNet/Display/1/Battery", dtostrf(bat, 4, 2, s), false);
+	boolean ret = client.publish("KNet/Display/1/Battery", dtostrf(bat, 4, 2, s), false);
 	client.disconnect();
+	delay(200);
 }

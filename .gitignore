@@ -339,3 +339,15 @@ ASALocalRun/
 # BeatPulse healthcheck temp database
 healthchecksdb
 /Libraries
+__vm/.KNet-Display.vsarduino.h
+__vm/Compile.vmps.xml
+__vm/Upload.vmps.xml
+.gitignore
+.pio/
+.vscode/
+.piosrc/
+_vm/
+__vm/.KNet-Display.vsarduino.h
+__vm/Compile.vmps.xml
+__vm/Upload.vmps.xml
+KNet-Display.vcxproj

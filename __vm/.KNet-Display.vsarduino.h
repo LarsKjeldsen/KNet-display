@@ -6,7 +6,7 @@
 			All non-arduino files created by visual micro and all visual studio project or solution files can be freely deleted and are not required to compile a sketch (do not delete your own code!).
 			Note: debugger breakpoints are stored in '.sln' or '.asln' files, knowledge of last uploaded breakpoints is stored in the upload.vmps.xml file. Both files are required to continue a previous debug session without needing to compile and upload again
 	
-	Hardware: WEMOS LOLIN32 Lite, Platform=esp32, Package=esp32
+	Hardware: ESP32 Dev Module, Platform=esp32, Package=esp32
 */
 
 #if defined(_VMICRO_INTELLISENSE)
@@ -15,16 +15,20 @@
 #define _VSARDUINO_H_
 #define __ESP32_esp32__
 #define __ESP32_ESP32__
-#define ESP_PLATFORM
 #define HAVE_CONFIG_H
-#define GCC_NOT_5_2_0 0
+#define UNITY_INCLUDE_CONFIG_H
 #define WITH_POSIX
+#define _GNU_SOURCE
+#define ESP_PLATFORM
 #define F_CPU 240000000L
 #define ARDUINO 108010
-#define ARDUINO_LOLIN32_LITE
+#define ARDUINO_ESP32_DEV
 #define ARDUINO_ARCH_ESP32
 #define ESP32
 #define CORE_DEBUG_LEVEL 0
+#define ARDUINO_RUNNING_CORE 1
+#define ARDUINO_EVENT_RUNNING_CORE 1
+#define ARDUINO_USB_CDC_ON_BOOT 0
 #define __cplusplus 201103L
 
 #define _Pragma(x)
@@ -90,7 +94,10 @@ typedef long pthread_mutex_t;
 typedef long pthread_mutex_t;
 typedef long pthread_cond_t;
 
+#define __CHAR_BIT__ 1
 
+// Ensure ArduinoJSON Lib Intellisense works correctly
+#define ARDUINOJSON_ENABLE_STD_STREAM 0
 
 #include "arduino.h"
 #include <pins_arduino.h> 

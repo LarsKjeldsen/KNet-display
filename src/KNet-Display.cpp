@@ -1,24 +1,15 @@
 /*
- Name:		Bryggers-Display.ino
+ Name:		Gang-Display.ino
  Created:	7/16/2019 6:56:00 PM
  Author:	lars S. Kjeldsen
 */
 
 // the setup function runs once when you press reset or power the board
 
-#include <BLEDevice.h>
-#include <ssl_client.h>
+#include <arduino.h>
 #include <PubSubClient.h>
 #include <gfxfont.h>
-#include <Adafruit_SPITFT_Macros.h>
-#include <Adafruit_SPITFT.h>
-#include <Adafruit_GFX.h>
 #include <SPI.h>
-#include <GxEPD2_GFX.h>
-#include <GxEPD2_EPD.h>
-#include <GxEPD2_BW.h>
-#include <GxEPD2_3C.h>
-#include <GxEPD2.h>
 #include <HTTPClient.h>
 #include <WiFiClientSecure.h>
 #include "Display.h"
@@ -33,8 +24,9 @@
 #include <WiFiAP.h>
 #include <WiFi.h>
 #include <ETH.h>
+#include <Adafruit_GFX.h>
+#include <GxEPD2_BW.h>
 #include "Network.h"
-#include <Arduino.h>
 
 
 unsigned long SleepTime = 60000;

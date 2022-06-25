@@ -8,11 +8,6 @@
 #include <Adafruit_SPITFT_Macros.h>
 #include <Adafruit_SPITFT.h>
 #include <Adafruit_GFX.h>
-#include <GxEPD2_GFX.h>
-#include <GxEPD2_EPD.h>
-#include <GxEPD2_BW.h>
-#include <GxEPD2_3C.h>
-#include <GxEPD2.h>
 #include "Network.h"
 
 
