@@ -27,21 +27,25 @@
 #include <Adafruit_GFX.h>
 #include <GxEPD2_BW.h>
 #include "Network.h"
-
+#include <driver/rtc_io.h>
 
 unsigned long SleepTime = 60000;
 
 #define LED 22
-#define DISPLAY_POWERPIN 17 // 5
+#define DISPLAY_POWERPIN GPIO_NUM_17
+#define BATTERY_PIN A4
 
 DisplayClass Display;
 float bat;
 
-void setup() {
-
-	//	pinMode(LED, OUTPUT);
-	//	digitalWrite(LED, HIGH);
+void setup()
+{
 	unsigned long start = millis();
+
+	btStop();
+
+	pinMode(LED_BUILTIN, OUTPUT);
+	digitalWrite(LED_BUILTIN, LOW);
 
 	Serial.begin(115200);
 	Serial.println("Booting");
@@ -49,7 +53,7 @@ void setup() {
 	pinMode(DISPLAY_POWERPIN, OUTPUT);
 	digitalWrite(DISPLAY_POWERPIN, HIGH);
 
-	bat = analogRead(A7) / 4096.0 * 7.445;
+	bat = analogRead(BATTERY_PIN) / 4096.0 * 7.445;
 
 	WiFi_Setup();
 	bool minut_10_tick = Display.Tid[Display.Tid.length() - 1] == '0';
@@ -59,56 +63,48 @@ void setup() {
 
 	WiFi.disconnect();
 
-	// pinMode(DISPLAY_POWERPIN, OUTPUT);
-	// digitalWrite(DISPLAY_POWERPIN, HIGH);
-
-	int hour = 25;
-
-	if (Display.Tid.length() == 5 && Display.Tid[0] != 'x')
-	{
-		hour = atoi(Display.Tid.substr(0, 2).c_str());
-
-		Serial.print("Hour = ");  Serial.println(hour);
-
-		if (hour > 6)
-			SleepTime = 60000;  // 1 min
-		else
-		{
-			SleepTime = 600000;   // 10 min
-			Display.Tid[4] = 'x';
-		}
-	}
+	pinMode(DISPLAY_POWERPIN, OUTPUT);
+	digitalWrite(DISPLAY_POWERPIN, HIGH);
 
 	minut_10_tick = true;  // Force full update everytime
+	
+		Display.setup(minut_10_tick);  // Run full update every 10th min.
 
-	Display.setup(minut_10_tick);  // Run full update every 10th min.
+		Display.UpdateDisplayUdeTemperatur();
 
-	Display.UpdateDisplayUdeTemperatur();
+		Display.UpdateDisplayTid();
 
-	Display.UpdateDisplayTid();
-
-	Display.UpdateDisplayBeskeder();
-	Display.UpdateDisplayBattery(bat);
-
+		Display.UpdateDisplayBeskeder();
+		Display.UpdateDisplayBattery(bat);
+	
 	int runtime = start - millis();
 
 	unsigned long t = runtime + SleepTime;
 
-	if (t < 100 || t > SleepTime) {
+	if (t < 100 || t > SleepTime)
+	{
 		Serial.println("Something wrong with sleeptimer - restarting ESP");
 		ESP.restart();
 	}
 
-	Serial.print("Sleeping : "); Serial.println(t);
+	Serial.print("Sleeping : ");
+	Serial.println(t);
 
 	Display.Sleep();
 	digitalWrite(DISPLAY_POWERPIN, LOW);
-
+	gpio_reset_pin(GPIO_NUM_2);
+	gpio_reset_pin(GPIO_NUM_12);
+	gpio_reset_pin(DISPLAY_POWERPIN);
+	rtc_gpio_isolate(GPIO_NUM_12);
+	adc_power_off();
+	gpio_pullup_dis(DISPLAY_POWERPIN);
+//	rtc_gpio_isolate(DISPLAY_POWERPIN);
+	
+	WiFi.disconnect(true);
 	esp_deep_sleep(t * 1000);
 
 	Serial.println("Should never end up here ......");
 }
-
 
 void loop()
 {

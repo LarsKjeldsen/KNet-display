@@ -30,5 +30,5 @@
 
 void WiFi_Setup();
 void SendBattery();
+void SendError(String str);
 #endif
-
