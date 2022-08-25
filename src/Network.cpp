@@ -22,26 +22,26 @@ void WiFi_Setup()
 
 	WiFi.config(ip, gw, mask);
 
-	WiFi.persistent(false); // <-- prevents flash wearing?
 	WiFi.setSleep(true);	// <-- WITHOUT THIS ESP CONNECTS ONLY AFTER FIRST FEW RESTARTS OR DOESN'T CONNECT AT ALL
 
 	WiFi.begin(ssid, password);
 	WiFi.setHostname("KNet-Display-1");
 
+	retry = 0;
 	while (int ret = WiFi.waitForConnectResult() != WL_CONNECTED)
 	{
-		retry++;
-		Serial.print("Connection Failed! Retrying... ErrorCode = ");
-		Serial.println(ret);
-		delay(1000);
-		if (retry >= 5)
+		Serial.print("Connection Failed! Retrying... ErrorCode = "); Serial.println(ret);
+		delay(200);
+		WiFi.begin(ssid, password);
+		if (retry++ >= 50)
 			ESP.restart();
 	}
+
+	retry = 0;
 	while (WiFi.status() != WL_CONNECTED)
 	{
 		delay(50);
-		Serial.print(".");
-		if (retry >= 50)
+		if (retry++ >= 100)
 			ESP.restart();
 	}
 

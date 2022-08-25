@@ -28,12 +28,15 @@
 #include <GxEPD2_BW.h>
 #include "Network.h"
 #include <driver/rtc_io.h>
+#include <driver/adc.h>
 
 unsigned long SleepTime = 60000;
 
-#define LED 22
+#define LED GPIO_NUM_2
 #define DISPLAY_POWERPIN GPIO_NUM_17
+// #define BATTERY_PIN GPIO_NUM_2 
 #define BATTERY_PIN A4
+
 
 DisplayClass Display;
 float bat;
@@ -42,40 +45,35 @@ void setup()
 {
 	unsigned long start = millis();
 
-	btStop();
+	//btStop();
 
-	pinMode(LED_BUILTIN, OUTPUT);
-	digitalWrite(LED_BUILTIN, LOW);
+	pinMode(LED, OUTPUT);
+	digitalWrite(LED, LOW);
 
 	Serial.begin(115200);
 	Serial.println("Booting");
 
-	pinMode(DISPLAY_POWERPIN, OUTPUT);
-	digitalWrite(DISPLAY_POWERPIN, HIGH);
-
 	bat = analogRead(BATTERY_PIN) / 4096.0 * 7.445;
-
+	
 	WiFi_Setup();
+	
 	bool minut_10_tick = Display.Tid[Display.Tid.length() - 1] == '0';
 
 	if (minut_10_tick)
 		SendBattery();
 
-	WiFi.disconnect();
+	WiFi.disconnect(true);
 
 	pinMode(DISPLAY_POWERPIN, OUTPUT);
 	digitalWrite(DISPLAY_POWERPIN, HIGH);
 
 	minut_10_tick = true;  // Force full update everytime
 	
-		Display.setup(minut_10_tick);  // Run full update every 10th min.
-
-		Display.UpdateDisplayUdeTemperatur();
-
-		Display.UpdateDisplayTid();
-
-		Display.UpdateDisplayBeskeder();
-		Display.UpdateDisplayBattery(bat);
+	Display.setup(minut_10_tick);  // Run full update every 10th min.
+	Display.UpdateDisplayUdeTemperatur();
+	Display.UpdateDisplayTid();
+	Display.UpdateDisplayBeskeder();
+	Display.UpdateDisplayBattery(bat);
 	
 	int runtime = start - millis();
 
@@ -91,16 +89,14 @@ void setup()
 	Serial.println(t);
 
 	Display.Sleep();
+
 	digitalWrite(DISPLAY_POWERPIN, LOW);
-	gpio_reset_pin(GPIO_NUM_2);
-	gpio_reset_pin(GPIO_NUM_12);
+	gpio_reset_pin(DISPLAY_POWERPIN);
+	gpio_hold_en(LED);
 	gpio_reset_pin(DISPLAY_POWERPIN);
 	rtc_gpio_isolate(GPIO_NUM_12);
-	adc_power_off();
-	gpio_pullup_dis(DISPLAY_POWERPIN);
-//	rtc_gpio_isolate(DISPLAY_POWERPIN);
-	
-	WiFi.disconnect(true);
+ 	gpio_deep_sleep_hold_en();
+
 	esp_deep_sleep(t * 1000);
 
 	Serial.println("Should never end up here ......");
