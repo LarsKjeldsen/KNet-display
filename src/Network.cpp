@@ -49,10 +49,12 @@ void WiFi_Setup()
 //	Serial.print("WiFi connected IP address: ");
 //	Serial.println(WiFi.localIP());
 
-	httpClient.begin("http://192.168.1.21:8123/api/states/sensor.besked");
-	httpClient.addHeader("Authorization", "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJhMzMyZWEzMTJjZTY0NmIwYTE5MjY3OTM0NzYxNTViNSIsImlhdCI6MTYyMDkyMDA2NiwiZXhwIjoxOTM2MjgwMDY2fQ.kLgcHfbVC9nxAVG4swHNuxAo4fyOr4UcmZMIF3r2_9M");
-	httpClient.addHeader("Content-Type", "application/json");
+//	httpClient.begin("http://192.168.1.21:8123/api/states/sensor.besked");
+//	httpClient.addHeader("Authorization", "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJhMzMyZWEzMTJjZTY0NmIwYTE5MjY3OTM0NzYxNTViNSIsImlhdCI6MTYyMDkyMDA2NiwiZXhwIjoxOTM2MjgwMDY2fQ.kLgcHfbVC9nxAVG4swHNuxAo4fyOr4UcmZMIF3r2_9M");
+	httpClient.begin("http://192.168.1.20:8123/api/states/sensor.besked");
+	httpClient.addHeader("Authorization", "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJiNzAwMTZhMWE5ODg0Mjc5ODdiOTA4MjYzOGYzYzM0MyIsImlhdCI6MTY2NjM1MjgyMSwiZXhwIjoxOTgxNzEyODIxfQ.bFjE97PlJEqvcgNdxfnfbnqmfXk3UrGi6hRejPrNFo4");
 
+	httpClient.addHeader("Content-Type", "application/json");
 	Display.Tid = "00:00";
 	Display.Ude_Temp = "x.x";
 	Display.Besked = "Home assistant is down.....";
