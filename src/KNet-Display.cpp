@@ -67,7 +67,7 @@ void setup()
 	pinMode(DISPLAY_POWERPIN, OUTPUT);
 	digitalWrite(DISPLAY_POWERPIN, HIGH);
 
-	minut_10_tick = true;  // Force full update everytime
+//	minut_10_tick = true;  // Force full update everytime
 	
 	Display.setup(minut_10_tick);  // Run full update every 10th min.
 	Display.UpdateDisplayUdeTemperatur();
