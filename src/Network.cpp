@@ -17,6 +17,7 @@ extern float bat;
 
 void WiFi_Setup()
 {
+	char s[10];
 	int retry = 0;
 	WiFi.mode(WIFI_STA);
 
@@ -53,11 +54,11 @@ void WiFi_Setup()
 	httpClient.addHeader("Authorization", "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJiNzAwMTZhMWE5ODg0Mjc5ODdiOTA4MjYzOGYzYzM0MyIsImlhdCI6MTY2NjM1MjgyMSwiZXhwIjoxOTgxNzEyODIxfQ.bFjE97PlJEqvcgNdxfnfbnqmfXk3UrGi6hRejPrNFo4");
 
 	httpClient.addHeader("Content-Type", "application/json");
-	Display.Tid = "00:00";
-	Display.Ude_Temp = "x.x";
-	Display.Besked = "Home assistant is down.....";
-
 	int httpCode = httpClient.GET();
+
+	Display.Tid = "00:00";
+	Display.Ude_Temp = itoa(httpCode, s, 10);
+	Display.Besked = "Home assistant is down..... ";
 
 	if (httpCode == -11) // Try again.
 	{
