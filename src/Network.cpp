@@ -23,7 +23,7 @@ void WiFi_Setup()
 
 	WiFi.config(ip, gw, mask);
 
-	WiFi.setSleep(true);	// <-- WITHOUT THIS ESP CONNECTS ONLY AFTER FIRST FEW RESTARTS OR DOESN'T CONNECT AT ALL
+	WiFi.setSleep(true); // <-- WITHOUT THIS ESP CONNECTS ONLY AFTER FIRST FEW RESTARTS OR DOESN'T CONNECT AT ALL
 
 	WiFi.begin(ssid, password);
 	WiFi.setHostname("KNet-Display-1");
@@ -31,11 +31,12 @@ void WiFi_Setup()
 	retry = 0;
 	while (int ret = WiFi.waitForConnectResult() != WL_CONNECTED)
 	{
-		Serial.print("Connection Failed! Retrying... ErrorCode = "); Serial.println(ret);
+		Serial.print("Connection Failed! Retrying... ErrorCode = ");
+		Serial.println(ret);
 		delay(200);
-		WiFi.begin(ssid, password);
-		if (retry++ >= 50)
+		if (retry++ >= 5)
 			ESP.restart();
+		WiFi.begin(ssid, password);
 	}
 
 	retry = 0;
@@ -46,9 +47,9 @@ void WiFi_Setup()
 			ESP.restart();
 	}
 
-//	Serial.println("");
-//	Serial.print("WiFi connected IP address: ");
-//	Serial.println(WiFi.localIP());
+	//	Serial.println("");
+	//	Serial.print("WiFi connected IP address: ");
+	//	Serial.println(WiFi.localIP());
 
 	httpClient.begin("http://192.168.1.22:8123/api/states/sensor.besked");
 	httpClient.addHeader("Authorization", "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJiNzAwMTZhMWE5ODg0Mjc5ODdiOTA4MjYzOGYzYzM0MyIsImlhdCI6MTY2NjM1MjgyMSwiZXhwIjoxOTgxNzEyODIxfQ.bFjE97PlJEqvcgNdxfnfbnqmfXk3UrGi6hRejPrNFo4");
@@ -56,42 +57,43 @@ void WiFi_Setup()
 	httpClient.addHeader("Content-Type", "application/json");
 	int httpCode = httpClient.GET();
 
-	Display.Tid = "00:00";
-	Display.Ude_Temp = itoa(httpCode, s, 10);
-	Display.Besked = "Home assistant is down..... ";
-
-	if (httpCode == -11) // Try again.
+	if (httpCode == -11 || httpCode == -1) // Try again.
 	{
 		httpCode = httpClient.GET();
 		Serial.print("*************** Retrying HTTP request httpcode = ");
 		Serial.println(httpCode);
 	}
 
-	if (httpCode > 0)
-	{ // Check for the returning code
-
+	if ((httpCode == 200) | (httpCode == 201))
+	{
 		String payload = httpClient.getString();
+		Serial.println(payload);
 		cJSON *root = cJSON_Parse(payload.c_str());
 		std::string besked_raw = (cJSON_GetObjectItem(root, "state")->valuestring);
-		//		Serial.println(("besked = " + besked_raw).c_str());
+		Serial.println(("besked = " + besked_raw).c_str());
 
 		int pos = 0;
 		std::string token;
-
 		pos = besked_raw.find("|");
-		token = besked_raw.substr(0, pos);
 		if (pos == std::string::npos)
+		{
+			Display.Besked = std::string("Error in string (1).....\n ") + std::string(payload.c_str());
 			return;
+		}
+		token = besked_raw.substr(0, pos);
 		Display.Tid = token;
-		//		Serial.println(("Tid = " + token).c_str());
+		Serial.println(("Tid = " + token).c_str());
 		besked_raw.erase(0, pos + 1);
 
 		pos = besked_raw.find("|");
-		token = besked_raw.substr(0, pos);
 		if (pos == std::string::npos)
+		{
+			Display.Besked = std::string("Error in string (2).....\n ") + std::string(payload.c_str());
 			return;
+		}
+		token = besked_raw.substr(0, pos);
 		Display.Ude_Temp = token + (char)186;
-		//		Serial.println(("Use_temp = " + token).c_str());
+		Serial.println(("Ude_temp = " + token).c_str());
 		besked_raw.erase(0, pos + 1);
 
 		for (int i = 0; i < besked_raw.length(); i++)
@@ -100,16 +102,15 @@ void WiFi_Setup()
 
 		Display.Besked = besked_raw;
 	}
-
 	else
 	{
-		Serial.println(httpClient.getString());
-
-		Display.Besked = "Error on HTTP request, errorcode : " + httpCode;
-		Serial.print("Error on HTTP request, errorcode : ");
+		Serial.print("Error code is : ");
 		Serial.println(httpCode);
-		SendError("Connection error : " + String(httpCode));
+		char S1[10]; char S2[10];
+		Display.Besked = std::string("Home assistant is down..... ") + itoa(httpCode, S1, 10) + std::string("\nWiFi status : ") + itoa((int)WiFi.status(), S2, 10);
+		+" : " + WiFi.status();
 	}
+
 	httpClient.end();
 }
 

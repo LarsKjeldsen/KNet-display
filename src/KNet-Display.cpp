@@ -44,14 +44,12 @@ float bat;
 void setup()
 {
 	unsigned long start = millis();
-
-	//btStop();
+//	setCpuFrequencyMhz(80);
 
 	pinMode(LED, OUTPUT);
 	digitalWrite(LED, LOW);
 
 	Serial.begin(115200);
-	Serial.println("Booting");
 
 	bat = analogRead(BATTERY_PIN) / 4096.0 * 7.445;
 	
@@ -67,7 +65,7 @@ void setup()
 	pinMode(DISPLAY_POWERPIN, OUTPUT);
 	digitalWrite(DISPLAY_POWERPIN, HIGH);
 
-//	minut_10_tick = true;  // Force full update everytime
+	minut_10_tick = true;  // Force full update everytime
 	
 	Display.setup(minut_10_tick);  // Run full update every 10th min.
 	Display.UpdateDisplayUdeTemperatur();
@@ -85,19 +83,22 @@ void setup()
 		ESP.restart();
 	}
 
-	Serial.print("Sleeping : ");
-	Serial.println(t);
+	Serial.print("Sleeping : "); Serial.println(t);
 
 	Display.Sleep();
 
 	digitalWrite(DISPLAY_POWERPIN, LOW);
-	gpio_reset_pin(DISPLAY_POWERPIN);
 	gpio_hold_en(LED);
-	gpio_reset_pin(DISPLAY_POWERPIN);
 	rtc_gpio_isolate(GPIO_NUM_12);
  	gpio_deep_sleep_hold_en();
 
-	esp_deep_sleep(t * 1000);
+    esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_PERIPH,   ESP_PD_OPTION_OFF);
+    esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_SLOW_MEM, ESP_PD_OPTION_OFF);
+    esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_FAST_MEM, ESP_PD_OPTION_OFF);
+    esp_sleep_pd_config(ESP_PD_DOMAIN_XTAL,         ESP_PD_OPTION_OFF);
+
+	esp_sleep_enable_timer_wakeup(t * 1000);
+    esp_deep_sleep_start();
 
 	Serial.println("Should never end up here ......");
 }

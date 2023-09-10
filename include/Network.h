@@ -4,6 +4,7 @@
 #define _NETWORK_h
 
 #include "Arduino.h"
+#include <string>
 #include <BLEDevice.h>
 #include <ssl_client.h>
 #include <WiFiUdp.h>

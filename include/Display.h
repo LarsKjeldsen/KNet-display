@@ -30,6 +30,8 @@ public:
 	std::string Ude_Temp;
 	std::string Tid;
 	std::string Besked;
+//	RTC_DATA_ATTR int Use_temp_save;
+//	RTC_DATA_ATTR time_t Time_save;
 
 	void setup(bool FullUpdate = false);
 	void Sleep();
