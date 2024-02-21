@@ -1,7 +1,8 @@
+#include <WIFI-Secret.h>
 #include "Network.h"
 
-char ssid[] = "Kjeldsen";
-char password[] = "donnafrida";
+char ssid[] = SSID_NAME;
+char password[] = PASSWORD;
 
 IPAddress ip(192, 168, 1, 216);
 IPAddress gw(192, 168, 1, 1);

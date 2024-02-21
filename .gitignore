@@ -351,3 +351,4 @@ __vm/.KNet-Display.vsarduino.h
 __vm/Compile.vmps.xml
 __vm/Upload.vmps.xml
 KNet-Display.vcxproj
+include/WIFI-Secret.h
