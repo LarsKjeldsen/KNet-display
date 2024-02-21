@@ -53,7 +53,7 @@ void WiFi_Setup()
 	//	Serial.println(WiFi.localIP());
 
 	httpClient.begin("http://192.168.1.22:8123/api/states/sensor.besked");
-	httpClient.addHeader("Authorization", "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJiNzAwMTZhMWE5ODg0Mjc5ODdiOTA4MjYzOGYzYzM0MyIsImlhdCI6MTY2NjM1MjgyMSwiZXhwIjoxOTgxNzEyODIxfQ.bFjE97PlJEqvcgNdxfnfbnqmfXk3UrGi6hRejPrNFo4");
+	httpClient.addHeader("Authorization", WEBAUTH);
 
 	httpClient.addHeader("Content-Type", "application/json");
 	int httpCode = httpClient.GET();
