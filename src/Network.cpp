@@ -52,7 +52,7 @@ void WiFi_Setup()
 	//	Serial.print("WiFi connected IP address: ");
 	//	Serial.println(WiFi.localIP());
 
-	httpClient.begin("http://192.168.1.22:8123/api/states/sensor.besked");
+	httpClient.begin("http://192.168.1.19:8123/api/states/sensor.besked");
 	httpClient.addHeader("Authorization", WEBAUTH);
 
 	httpClient.addHeader("Content-Type", "application/json");
