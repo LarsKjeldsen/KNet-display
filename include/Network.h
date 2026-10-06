@@ -29,7 +29,7 @@
 #include <WiFiClientSecure.h>
 #include <cJSON.h>
 
-void WiFi_Setup();
+bool WiFi_Setup();
 void SendBattery();
 void SendError(String str);
 #endif

@@ -33,7 +33,7 @@
 unsigned long SleepTime = 60000;
 
 #define LED GPIO_NUM_2
-#define DISPLAY_POWERPIN GPIO_NUM_17
+#define DISPLAY_POWERPIN GPIO_NUM_14
 // #define BATTERY_PIN GPIO_NUM_2 
 #define BATTERY_PIN A4
 
@@ -43,8 +43,11 @@ float bat;
 
 void setup()
 {
-	unsigned long start = millis();
-//	setCpuFrequencyMhz(80);
+	const unsigned long start = millis();
+	setCpuFrequencyMhz(80);
+
+	gpio_hold_dis(LED);
+	gpio_hold_dis(DISPLAY_POWERPIN); // release the hold set before the previous deep sleep
 
 	pinMode(LED, OUTPUT);
 	digitalWrite(LED, LOW);
@@ -52,43 +55,50 @@ void setup()
 	Serial.begin(115200);
 
 	bat = analogRead(BATTERY_PIN) / 4096.0 * 7.445;
-	
-	WiFi_Setup();
-	
-	bool minut_10_tick = Display.Tid[Display.Tid.length() - 1] == '0';
+	Serial.print("Battery voltage = "); Serial.println(bat, 2);
 
-	if (minut_10_tick)
+	bool wifiConnected = WiFi_Setup();
+	if (wifiConnected)
+	{
 		SendBattery();
+	}
 
 	WiFi.disconnect(true);
+	WiFi.mode(WIFI_OFF);
 
 	pinMode(DISPLAY_POWERPIN, OUTPUT);
 	digitalWrite(DISPLAY_POWERPIN, HIGH);
 
-	minut_10_tick = true;  // Force full update everytime
-	
-	Display.setup(minut_10_tick);  // Run full update every 10th min.
+	Display.setup(true);  // PWR is powered off during sleep, wiping the controller RAM; full refresh every wake
 	Display.UpdateDisplayUdeTemperatur();
 	Display.UpdateDisplayTid();
 	Display.UpdateDisplayBeskeder();
 	Display.UpdateDisplayBattery(bat);
-	
-	int runtime = start - millis();
 
-	unsigned long t = runtime + SleepTime;
-
-	if (t < 100 || t > SleepTime)
+	const unsigned long elapsed = millis() - start;
+	unsigned long sleepForMs = SleepTime;
+	if (elapsed < SleepTime)
 	{
-		Serial.println("Something wrong with sleeptimer - restarting ESP");
-		ESP.restart();
+		sleepForMs = SleepTime - elapsed;
+	}
+	else
+	{
+		sleepForMs = 1000; // keep the device from restarting endlessly if setup ran too long
 	}
 
-	Serial.print("Sleeping : "); Serial.println(t);
+	if (sleepForMs < 1000 || sleepForMs > SleepTime)
+	{
+		Serial.println("Slept too long or too short, using safe fallback");
+		sleepForMs = 1000;
+	}
+
+	Serial.print("Sleeping : "); Serial.println(sleepForMs);
 
 	Display.Sleep();
 
 	digitalWrite(DISPLAY_POWERPIN, LOW);
 	gpio_hold_en(LED);
+	gpio_hold_en(DISPLAY_POWERPIN);
 	rtc_gpio_isolate(GPIO_NUM_12);
  	gpio_deep_sleep_hold_en();
 
@@ -97,7 +107,7 @@ void setup()
     esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_FAST_MEM, ESP_PD_OPTION_OFF);
     esp_sleep_pd_config(ESP_PD_DOMAIN_XTAL,         ESP_PD_OPTION_OFF);
 
-	esp_sleep_enable_timer_wakeup(t * 1000);
+	esp_sleep_enable_timer_wakeup(sleepForMs * 1000ULL);
     esp_deep_sleep_start();
 
 	Serial.println("Should never end up here ......");

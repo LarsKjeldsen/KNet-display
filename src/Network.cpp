@@ -16,36 +16,36 @@ PubSubClient client(ethClient);
 extern DisplayClass Display;
 extern float bat;
 
-void WiFi_Setup()
+bool WiFi_Setup()
 {
 	char s[10];
 	int retry = 0;
 	WiFi.mode(WIFI_STA);
-
+	WiFi.disconnect(true);
 	WiFi.config(ip, gw, mask);
-
 	WiFi.setSleep(true); // <-- WITHOUT THIS ESP CONNECTS ONLY AFTER FIRST FEW RESTARTS OR DOESN'T CONNECT AT ALL
-
-	WiFi.begin(ssid, password);
 	WiFi.setHostname("KNet-Display-1");
 
-	retry = 0;
-	while (int ret = WiFi.waitForConnectResult() != WL_CONNECTED)
+	for (retry = 0; retry < 5; ++retry)
 	{
-		Serial.print("Connection Failed! Retrying... ErrorCode = ");
-		Serial.println(ret);
-		delay(200);
-		if (retry++ >= 5)
-			ESP.restart();
 		WiFi.begin(ssid, password);
+		int status = WiFi.waitForConnectResult();
+		if (status == WL_CONNECTED)
+		{
+			break;
+		}
+		Serial.print("Connection Failed! Retrying... Status = ");
+		Serial.println(status);
+		delay(500);
 	}
 
-	retry = 0;
-	while (WiFi.status() != WL_CONNECTED)
+	if (WiFi.status() != WL_CONNECTED)
 	{
-		delay(50);
-		if (retry++ >= 100)
-			ESP.restart();
+		Serial.println("WiFi connection failed; sleeping without network refresh");
+		Display.Besked = "WiFi unavailable";
+		Display.Tid = "--:--";
+		Display.Ude_Temp = "--";
+		return false;
 	}
 
 	//	Serial.println("");
@@ -60,6 +60,7 @@ void WiFi_Setup()
 
 	if (httpCode == -11 || httpCode == -1) // Try again.
 	{
+		delay(300); // first attempt's failed connect triggers ARP resolution for the gateway; give it time before retrying
 		httpCode = httpClient.GET();
 		Serial.print("*************** Retrying HTTP request httpcode = ");
 		Serial.println(httpCode);
@@ -70,6 +71,13 @@ void WiFi_Setup()
 		String payload = httpClient.getString();
 		Serial.println(payload);
 		cJSON *root = cJSON_Parse(payload.c_str());
+		if (root == nullptr || cJSON_GetObjectItem(root, "state") == nullptr || cJSON_GetObjectItem(root, "state")->valuestring == nullptr)
+		{
+			Serial.println("Invalid Home Assistant payload");
+			Display.Besked = "Invalid payload";
+			httpClient.end();
+			return true;
+		}
 		std::string besked_raw = (cJSON_GetObjectItem(root, "state")->valuestring);
 		Serial.println(("besked = " + besked_raw).c_str());
 
@@ -79,7 +87,8 @@ void WiFi_Setup()
 		if (pos == std::string::npos)
 		{
 			Display.Besked = std::string("Error in string (1).....\n ") + std::string(payload.c_str());
-			return;
+			httpClient.end();
+			return true;
 		}
 		token = besked_raw.substr(0, pos);
 		Display.Tid = token;
@@ -90,7 +99,8 @@ void WiFi_Setup()
 		if (pos == std::string::npos)
 		{
 			Display.Besked = std::string("Error in string (2).....\n ") + std::string(payload.c_str());
-			return;
+			httpClient.end();
+			return true;
 		}
 		token = besked_raw.substr(0, pos);
 		Display.Ude_Temp = token + (char)186;
@@ -113,6 +123,7 @@ void WiFi_Setup()
 	}
 
 	httpClient.end();
+	return true;
 }
 
 void SendBattery()

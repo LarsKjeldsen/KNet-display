@@ -4,5 +4,12 @@
 			"path": "."
 		}
 	],
-	"settings": {}
+	"settings": {
+		"chat.tools.terminal.autoApprove": {
+			"/^\\$env:Path; Get-Command pio -ErrorAction SilentlyContinue; where\\.exe pio; if \\(Test-Path \"\\$env:USERPROFILE\\\\\\.platformio\\\\penv\\\\Scripts\\\\pio\\.exe\"\\) \\{ Write-Host \"FOUND:\\$env:USERPROFILE\\\\\\.platformio\\\\penv\\\\Scripts\\\\pio\\.exe\" \\}$/": {
+				"approve": true,
+				"matchCommandLine": true
+			}
+		}
+	}
 }

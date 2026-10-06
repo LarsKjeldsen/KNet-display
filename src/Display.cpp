@@ -181,13 +181,4 @@ std::string DisplayClass::StringConv(std::string s)
 	}
 	return r;
 
-	/*
-	186;  // Grad
-	197;  // �
-	198;  // �
-	216;  // �
-	229;  // �
-	230;  // �
-	248;  // �
-*/
 }
